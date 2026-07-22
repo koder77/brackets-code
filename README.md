@@ -6,7 +6,7 @@ A CLI tool for generating Brackets (L1VM) code from natural language prompts.
 
 ```bash
 # Clone and build
-git clone https://github.com/your-org/brackets-code.git
+git clone https://github.com/koder77/brackets-code.git
 cd brackets-code
 make
 
