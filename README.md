@@ -81,67 +81,67 @@ Current optimizations:
 
 GPLv3 or later
 
-## Erweitertes .l1dsl Dateiformat
+## Extended .l1dsl File Format
 
-Die `.l1dsl` Dateien sind deklarative Regeln, die natürliche Sprache in L1VM-Code übersetzen.
-Neben den grundlegenden Direktiven (`parser:`, `token:`, `code:` etc.) stehen 13 erweiterte
-Direktiven zur Verfügung, um mächtigere und intelligentere Regeln zu erstellen.
+The `.l1dsl` files are declarative rules that translate natural language into L1VM code.
+In addition to the basic directives (`parser:`, `token:`, `code:`, etc.), 13 extended
+directives are available to create more powerful and intelligent rules.
 
-### Übersicht aller Direktiven
+### Overview of All Directives
 
-#### Grundlegende Direktiven (bestehend)
+#### Basic Directives (existing)
 
-| Direktiv | Beschreibung | Beispiel |
+| Directive | Description | Example |
 |---|---|---|
-| `parser:` | Keywords für Prompt-Matching (Kommagetrennt) | `parser: "fibonacci, fib, fib sequence"` |
-| `token:` | Eingabe-Variablen mit Typ | `token: int64 n, double x` |
-| `result:` | Ausgabe-Variabel | `result: double y` |
-| `include:` | L1VM Header-Datei (pre-processing) | `include: intr-func.l1h` |
-| `include-post:` | Header nach den Haupt-Includes | `include-post: math-lib.l1h` |
-| `var:` | Explizite Variablen-Deklaration | `var: int64 myvar 1 42` |
-| `desc:` | Menschliche Beschreibung | `desc: "Berechnet Fibonacci-Zahl"` |
-| `match:` | TaskProfile-Flags für exaktes Matching | `match: has_fib_seq` |
-| `array:` | Array-Regel-Deklaration | `array: arr i int64` |
-| `code:` | Beginn des Code-Blocks | `code:` |
+| `parser:` | Keywords for prompt matching (comma-separated) | `parser: "fibonacci, fib, fib sequence"` |
+| `token:` | Input variables with type | `token: int64 n, double x` |
+| `result:` | Output variable | `result: double y` |
+| `include:` | L1VM header file (pre-processing) | `include: intr-func.l1h` |
+| `include-post:` | Header after main includes | `include-post: math-lib.l1h` |
+| `var:` | Explicit variable declaration | `var: int64 myvar 1 42` |
+| `desc:` | Human-readable description | `desc: "Computes Fibonacci number"` |
+| `match:` | TaskProfile flags for exact matching | `match: has_fib_seq` |
+| `array:` | Array rule declaration | `array: arr i int64` |
+| `code:` | Start of code block | `code:` |
 
-#### Neue erweiterte Direktiven
+#### New Extended Directives
 
-| Direktiv | Beschreibung | Beispiel |
+| Directive | Description | Example |
 |---|---|---|
-| `param:` | Reichhaltige Parameter mit Validierung | `param: int64 n "Anzahl" min=1 max=100 default=10` |
-| `require:` | Externe Abhängigkeit (semantisch stark) | `require: math-lib.l1h` |
-| `example:` | Beispiel-Prompts | `example: "fibonacci 10"` |
-| `category:` | Hierarchische Kategorisierung | `category: math > sequences` |
-| `version:` | Versions-Tracking | `version: 2.0.0` |
-| `complexity:` | Komplexitätsstufe | `complexity: simple` |
-| `alias:` | Zusätzliche Aliase | `alias: "fibo, fib seq"` |
-| `test:` | Eingebaute Testfälle | `test: "fibonacci 10" expect: "55"` |
-| `help:` | Erweiterter Hilfe-Text | `help: "Berechnet die n-te Fibonacci-Zahl"` |
-| `validate:` | Validierungsregeln | `validate: no_division_by_zero` |
-| `compose:` | Regel-Zusammensetzung | `compose: base-rule, print-rule` |
-| `init:` | Initialisierungs-Code-Block | `init:` (vor Hauptcode) |
-| `cleanup:` | Aufräum-Code-Block | `cleanup:` (nach Hauptcode) |
+| `param:` | Rich parameters with validation | `param: int64 n "Count" min=1 max=100 default=10` |
+| `require:` | External dependency (semantically strong) | `require: math-lib.l1h` |
+| `example:` | Example prompts | `example: "fibonacci 10"` |
+| `category:` | Hierarchical categorization | `category: math > sequences` |
+| `version:` | Version tracking | `version: 2.0.0` |
+| `complexity:` | Complexity level | `complexity: simple` |
+| `alias:` | Additional aliases | `alias: "fibo, fib seq"` |
+| `test:` | Built-in test cases | `test: "fibonacci 10" expect: "55"` |
+| `help:` | Extended help text | `help: "Computes the nth Fibonacci number"` |
+| `validate:` | Validation rules | `validate: no_division_by_zero` |
+| `compose:` | Rule composition | `compose: base-rule, print-rule` |
+| `init:` | Initialization code block | `init:` (before main code) |
+| `cleanup:` | Cleanup code block | `cleanup:` (after main code) |
 
 ---
 
-### Vollständiges Beispiel: fibonacci-smart.l1dsl
+### Complete Example: fibonacci-smart.l1dsl
 
 ```l1dsl
 // fibonacci-smart.l1dsl
 parser: "fibonacci, fib, fib sequence"
 alias: "fibo, fib seq, fibonacci number"
-desc: "Berechnet die n-te Fibonacci-Zahl iterativ"
+desc: "Computes the nth Fibonacci number iteratively"
 category: math > sequences
 version: 2.0.0
 complexity: simple
-help: "Berechnet die n-te Fibonacci-Zahl iterativ. Parameter n gibt die Anzahl der Iterationen an."
+help: "Computes the nth Fibonacci number iteratively. Parameter n specifies the number of iterations."
 match: has_fib_seq
-param: int64 n "Anzahl der Iterationen" min=1 max=100 default=10
+param: int64 n "Number of iterations" min=1 max=100 default=10
 token: int64 n
 result: int64 fib
 include: intr-func.l1h
 example: "fibonacci 10"
-example: "fibonacci berechne 20"
+example: "fibonacci compute 20"
 test: "fibonacci 10" expect: "55"
 
 init:
@@ -170,33 +170,33 @@ cleanup:
 
 ---
 
-### Erklärung der neuen Direktiven
+### Explanation of the New Directives
 
-#### `param:` — Reichhaltige Parameter-Definition
+#### `param:` — Rich Parameter Definition
 
-Erweitert `token:` um Metadaten für Validierung und Benutzerführung.
+Extends `token:` with metadata for validation and user guidance.
 
 ```l1dsl
-param: int64 n "Anzahl der Iterationen" min=1 max=1000 default=10
-param: string name "Ihr Name" default="Welt" required
+param: int64 n "Number of iterations" min=1 max=1000 default=10
+param: string name "Your name" default="World" required
 ```
 
 **Syntax:** `param: type name [desc="..."] [min=X] [max=X] [default=X] [pattern=regex] [required]`
 
-| Attribut | Beschreibung |
+| Attribute | Description |
 |---|---|
-| `desc=` | Beschreibung des Parameters |
-| `min=` | Minimaler Wert (int64/double) |
-| `max=` | Maximaler Wert (int64/double) |
-| `default=` | Standardwert |
-| `pattern=` | Regex-Pattern (string) |
-| `required` | Parameter ist obligatorisch |
+| `desc=` | Parameter description |
+| `min=` | Minimum value (int64/double) |
+| `max=` | Maximum value (int64/double) |
+| `default=` | Default value |
+| `pattern=` | Regex pattern (string) |
+| `required` | Parameter is mandatory |
 
 ---
 
-#### `require:` — Externe Abhängigkeit
+#### `require:` — External Dependency
 
-Wie `include:`, aber mit semantischer Bedeutung: Diese Datei ist zwingend erforderlich.
+Like `include:`, but with semantic meaning: this file is strictly required.
 
 ```l1dsl
 require: math-lib.l1h
@@ -205,22 +205,22 @@ require: fann-lib.l1h
 
 ---
 
-#### `example:` — Beispiel-Prompts
+#### `example:` — Example Prompts
 
-Definiert Beispiel-Prompts, die diese Regel auslösen sollten. Nützlich für
-Dokumentation und zukünftiges Matching.
+Defines example prompts that should trigger this rule. Useful for
+documentation and future matching.
 
 ```l1dsl
 example: "fibonacci 10"
-example: "berechne fibonacci für 20"
+example: "compute fibonacci for 20"
 example: "fib sequence 50"
 ```
 
 ---
 
-#### `category:` — Hierarchische Kategorisierung
+#### `category:` — Hierarchical Categorization
 
-Ordnet die Regel einer Kategorie mit `>`-Separatoren zu.
+Assigns the rule to a category using `>` separators.
 
 ```l1dsl
 category: math > sequences
@@ -230,9 +230,9 @@ category: data > sorting
 
 ---
 
-#### `version:` — Versions-Tracking
+#### `version:` — Version Tracking
 
-Semantic Versioning für Regeln.
+Semantic versioning for rules.
 
 ```l1dsl
 version: 2.1.0
@@ -240,31 +240,31 @@ version: 2.1.0
 
 ---
 
-#### `complexity:` — Komplexitätsstufe
+#### `complexity:` — Complexity Level
 
-Hilft dem System, die passende Regel auszuwählen.
+Helps the system select the appropriate rule.
 
 ```l1dsl
-complexity: simple     # Einfache Logik
-complexity: medium     # Mittelkomplex
-complexity: complex    # Hochkomplex
+complexity: simple     # Simple logic
+complexity: medium     # Medium complexity
+complexity: complex    # High complexity
 ```
 
 ---
 
-#### `alias:` — Zusätzliche Aliase
+#### `alias:` — Additional Aliases
 
-Neben `parser:` für weiteres Matching.
+Besides `parser:` for additional matching.
 
 ```l1dsl
-alias: "fibo, fib seq, fibonacci number, fibonacci-folge"
+alias: "fibo, fib seq, fibonacci number, fibonacci-sequence"
 ```
 
 ---
 
-#### `test:` — Eingebaute Testfälle
+#### `test:` — Built-in Test Cases
 
-Testfälle direkt in der Regel definieren.
+Define test cases directly in the rule.
 
 ```l1dsl
 test: "fibonacci 10" expect: "55"
@@ -274,19 +274,19 @@ test: "fibonacci 5" expect: "5"
 
 ---
 
-#### `help:` — Erweiterter Hilfe-Text
+#### `help:` — Extended Help Text
 
-Ausführliche Hilfe, die bei `--help` oder in der Interaktiven Shell angezeigt wird.
+Detailed help displayed with `--help` or in the interactive shell.
 
 ```l1dsl
-help: "Berechnet die n-te Fibonacci-Zahl iterativ.\nVerwendung: fibonacci <zahl>\nBeispiel: fibonacci 10"
+help: "Computes the nth Fibonacci number iteratively.\nUsage: fibonacci <number>\nExample: fibonacci 10"
 ```
 
 ---
 
-#### `validate:` — Validierungsregeln
+#### `validate:` — Validation Rules
 
-Named Validierungs-Checks für den generierten Code.
+Named validation checks for the generated code.
 
 ```l1dsl
 validate: no_division_by_zero, has_bounds_check
@@ -294,9 +294,9 @@ validate: no_division_by_zero, has_bounds_check
 
 ---
 
-#### `compose:` — Regel-Zusammensetzung
+#### `compose:` — Rule Composition
 
-Aktuelle Regel erweitert andere Regeln.
+Current rule extends other rules.
 
 ```l1dsl
 compose: base-fibonacci, print-result
@@ -304,9 +304,9 @@ compose: base-fibonacci, print-result
 
 ---
 
-#### `init:` — Initialisierungs-Code
+#### `init:` — Initialization Code
 
-Code-Block, der **vor** dem Hauptcode (`code:`) ausgeführt wird.
+Code block executed **before** the main code (`code:`).
 
 ```l1dsl
 init:
@@ -315,47 +315,47 @@ init:
     (zero :math_init !)
 ```
 
-Nützlich für:
-- Konstanten definieren
-- Bibliotheken initialisieren
-- Ressourcen allozieren
+Useful for:
+- Defining constants
+- Initializing libraries
+- Allocating resources
 
 ---
 
-#### `cleanup:` — Aufräum-Code
+#### `cleanup:` — Cleanup Code
 
-Code-Block, der **nach** dem Hauptcode (`code:`) ausgeführt wird.
+Code block executed **after** the main code (`code:`).
 
 ```l1dsl
 cleanup:
     (zero :exit !)
 ```
 
-Nützlich für:
-- Ressourcen freigeben
-- Verbindungen schließen
-- Programmaufräumung
+Useful for:
+- Releasing resources
+- Closing connections
+- Program cleanup
 
 ---
 
-### Verarbeitungsreihenfolge
+### Processing Order
 
-Die Code-Generierung erfolgt in dieser Reihenfolge:
+Code generation follows this order:
 
 ```
-1. include: / require:     ← Header-Dateien
-2. include-post:           ← Nach-Processing Headers
-3. var:                    ← Variablen-Deklarationen
-4. token: / param:         ← Parameter-Variablen
-5. result:                 ← Ergebnis-Variabel
-6. init:                   ← Initialisierungscode
-7. code:                   ← Hauptcode
-8. cleanup:                ← Aufräumcode
+1. include: / require:     ← Header files
+2. include-post:           ← Post-processing headers
+3. var:                    ← Variable declarations
+4. token: / param:         ← Parameter variables
+5. result:                 ← Result variable
+6. init:                   ← Initialization code
+7. code:                   ← Main code
+8. cleanup:                ← Cleanup code
 ```
 
 ---
 
-### Rückwärtskompatibilität
+### Backward Compatibility
 
-Alle 162 bestehenden `.l1dsl` Files in `dsl/` bleiben **vollständig unverändert**.
-Die neuen Direktiven sind optional — bestehende Regeln funktionieren weiterhin genau wie zuvor.
+All 162 existing `.l1dsl` files in `dsl/` remain **completely unchanged**.
+The new directives are optional — existing rules continue to work exactly as before.
