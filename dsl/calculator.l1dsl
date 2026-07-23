@@ -1,5 +1,5 @@
 // calculator.l1dsl
-parser: "calculator, add, subtract, multiply, divide, mod"
+parser: "calculator, add, subtract, multiply, divide, mod, basic calculator, simple calculator, scientific calculator"
 match: has_calculator
 include: intr-func.l1h
 desc: "Interactive calculator with menu for add, sub, mul, div, mod"

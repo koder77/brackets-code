@@ -1,5 +1,5 @@
 // fibonacci.l1dsl
-parser: "fibonacci, fib, fib sequence"
+parser: "fibonacci, fib, fib sequence, iterative fibonacci, recursive fibonacci"
 match: has_fib_seq
 token: int64 n
 include: intr-func.l1h

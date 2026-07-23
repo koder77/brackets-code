@@ -12,18 +12,24 @@ ifeq ($(HAVE_RL),1)
   LDFLAGS += $(RL_LIBS)
 endif
 
-BINARY  = brackets-code
-SOURCE  = brackets-code.c
-DSL     = dsl.c
-EMBED   = embed.c
-LEARN   = learn.c
-HEADER  = brackets-code.h
-DSL_H   = dsl.h
-SYNONYM = synonyms.txt
-MANPAGE = brackets-code.1
-TEST_SH = tests/run_tests.sh
+BINARY       = brackets-code
+SOURCE       = brackets-code.c
+DSL          = dsl.c
+EMBED        = embed.c
+LEARN        = learn.c
+TRANSFORMER  = tiny_transformer.c
+PATTERNS     = code_patterns.c
+TRAIN_TOOL   = train_tiny.c
+HEADER       = brackets-code.h
+DSL_H        = dsl.h
+TT_H         = tiny_transformer.h
+CP_H         = code_patterns.h
+SYNONYM      = synonyms.txt
+MANPAGE      = brackets-code.1
+TEST_SH      = tests/run_tests.sh
+MODEL_FILE   = tiny_model.tiny
 
-.PHONY: all test clean install uninstall dist lint check unit-test
+.PHONY: all test clean install uninstall dist lint check unit-test train predict
 
 all: $(BINARY)
 
@@ -33,15 +39,33 @@ all: $(BINARY)
 dsl.o: dsl.c $(HEADER) $(DSL_H)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
+tiny_transformer.o: tiny_transformer.c $(TT_H)
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+code_patterns.o: code_patterns.c $(HEADER) $(TT_H) $(CP_H)
+	$(CC) $(CFLAGS) -c -o $@ $<
+
 # embed.o and learn.o compile clean with -Wall -Wextra
 
-$(BINARY): $(SOURCE:.c=.o) $(DSL:.c=.o) $(EMBED:.c=.o) $(LEARN:.c=.o)
+$(BINARY): $(SOURCE:.c=.o) $(DSL:.c=.o) $(EMBED:.c=.o) $(LEARN:.c=.o) $(TRANSFORMER:.c=.o) $(PATTERNS:.c=.o)
 	@if [ "$(HAVE_RL)" = "1" ]; then \
 		echo "  readline found, enabling interactive history"; \
 	else \
 		echo "  readline not found, using plain fgets"; \
 	fi
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+
+# Training tool
+train_tiny: $(TRAIN_TOOL:.c=.o) $(TRANSFORMER:.c=.o)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+
+# Train the tiny transformer on DSL data
+train: train_tiny
+	./train_tiny --dsl-dir dsl --model $(MODEL_FILE) --epochs 50 --lr 0.01
+
+# Quick prediction test
+predict: $(BINARY)
+	./train_tiny --model $(MODEL_FILE) --predict "$(PROMPT)"
 
 # Static analysis
 lint: $(SOURCE)
@@ -73,10 +97,11 @@ unit-test: $(BINARY)
 	@tests/test_unit
 
 clean:
-	rm -f $(BINARY)
+	rm -f $(BINARY) train_tiny
 	rm -f ./*.l1com ./*.l1asm ./*.l1dbg ./*.l1obj
 	rm -f tests/saved-failures/*.l1com tests/saved-failures/*_pp.l1com
 	rm -f ./*.o tests/*.o
+	rm -f $(MODEL_FILE)
 
 install: $(BINARY) $(SYNONYM) $(MANPAGE) $(HEADER) $(DSL_H)
 	install -d $(DESTDIR)$(PREFIX)/bin
@@ -103,7 +128,8 @@ dist:
 	@VERSION="$$(grep 'VERSION_TXT' $(SOURCE) | cut -d'"' -f2)"; \
 	tardir="brackets-code-$$VERSION"; \
 	mkdir -p /tmp/$$tardir; \
-	cp $(SOURCE) $(DSL) $(EMBED) $(LEARN) $(HEADER) $(DSL_H) $(SYNONYM) $(MANPAGE) Makefile README.md memory.txt /tmp/$$tardir/; \
+	cp $(SOURCE) $(DSL) $(EMBED) $(LEARN) $(TRANSFORMER) $(TRAIN_TOOL) \
+	   $(HEADER) $(DSL_H) $(TT_H) $(SYNONYM) $(MANPAGE) Makefile README.md memory.txt /tmp/$$tardir/; \
 	cp -r tests l1vm-example-code dsl /tmp/$$tardir/; \
 	cd /tmp && tar czf brackets-code-$$VERSION.tar.gz $$tardir; \
 	echo "Created /tmp/brackets-code-$$VERSION.tar.gz"

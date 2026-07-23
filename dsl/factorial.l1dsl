@@ -1,5 +1,5 @@
 // factorial.l1dsl
-parser: "factorial, calculate factorial"
+parser: "factorial, calculate factorial, iterative factorial, recursive factorial"
 match: has_factorial
 token: int64 n
 result: int64 fact

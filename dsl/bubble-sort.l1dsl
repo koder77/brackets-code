@@ -1,5 +1,5 @@
 // bubble-sort.l1dsl
-parser: "bubble sort, sort array, sort numbers"
+parser: "bubble sort, sort array, sort numbers, ascending sort, descending sort, simple sort, optimized sort"
 token: int64 arr[100], int64 count
 include: intr-func.l1h
 include: vars.l1h

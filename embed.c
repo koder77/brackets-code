@@ -18,6 +18,8 @@
  */
 
 #include "brackets-code.h"
+#include "tiny_transformer.h"
+#include "code_patterns.h"
 
 // ==================== TINY LLM INFERENCE ENGINE ====================
 
@@ -33,6 +35,14 @@ const char *EMITTER_NAMES[NUM_EMITTERS] = {"math","input_loop","loop","for_sum",
 typedef int EMITTER_COUNT_CHECK[(sizeof(EMITTER_NAMES)/sizeof(EMITTER_NAMES[0])) == NUM_EMITTERS ? 1 : -1];
 int vs_boost_tokens[64];
 int vs_boost_count = 0;
+
+// Transformer integration
+static int tt_model_loaded = 0;
+static int tt_model_checked = 0;
+
+// Code pattern database
+static CPPatternDB *cp_db = NULL;
+static int cp_db_loaded = 0;
 
 // Vector search data structures
 const char *example_subdirs[EXAMPLE_SUBDIRS] = {"prog", "include", "lib"};
@@ -275,6 +285,92 @@ static void apply_token_boosts(float *scores, const int *tokens, int count,
 }
 
 int llm_select_emitter(const char *prompt, TaskProfile *task) {
+    // Try transformer prediction first (if model is loaded)
+    if (!tt_model_checked) {
+        tt_model_checked = 1;
+        tt_model_loaded = (tt_init("tiny_model.tiny") == 0) ? 1 : 0;
+    }
+    
+    // Load code pattern DB if not loaded
+    if (!cp_db_loaded) {
+        cp_db = malloc(sizeof(CPPatternDB));
+        if (cp_db) {
+            cp_init(cp_db);
+            // Add hand-crafted patterns for key emitters
+            cp_create_fibonacci(cp_db);
+            cp_create_bubble_sort(cp_db);
+            cp_create_hello_name(cp_db);
+            cp_create_fizzbuzz(cp_db);
+            cp_create_factorial(cp_db);
+            cp_create_primes(cp_db);
+            cp_create_selection_sort(cp_db);
+            cp_create_calculator(cp_db);
+            cp_create_hello_world(cp_db);
+            cp_create_string_length(cp_db);
+            cp_create_array_reverse(cp_db);
+        }
+        cp_db_loaded = 1;
+    }
+
+    if (tt_model_loaded) {
+        float tt_score = 0;
+        int tt_emitter = tt_predict(prompt, &tt_score);
+        if (tt_emitter >= 0 && tt_emitter < NUM_EMITTERS && tt_score > 0.3f) {
+            if (verbose_flag) {
+                printf("  transformer prediction: %s (%.2f%%)\n",
+                       EMITTER_NAMES[tt_emitter], tt_score * 100.0f);
+            }
+            // Use transformer prediction if confidence is high enough
+            // Otherwise fall through to rule-based scoring
+            if (tt_score > 0.5f) {
+                // Initialize extra emitters for composition
+                task->num_extra_emitters = 0;
+
+                // Use pattern DB for code generation if available
+                if (cp_db && cp_db->num_patterns > 0) {
+                    CPExtraction extraction;
+                    cp_extract_params(prompt, &extraction);
+
+                    int pat_idx = cp_find_best(cp_db, prompt, tt_emitter, &extraction);
+                    if (pat_idx >= 0) {
+                        int var_idx = cp_find_best_variation(&cp_db->patterns[pat_idx], prompt);
+                        if (verbose_flag) {
+                            printf("  pattern: %s (variation: %s)\n",
+                                   cp_db->patterns[pat_idx].name,
+                                   cp_db->patterns[pat_idx].variations[var_idx].name);
+                            if (extraction.num_params > 0) {
+                                printf("  extracted: ");
+                                for (int p = 0; p < extraction.num_params; p++) {
+                                    printf("%s=%s ", extraction.params[p].name,
+                                           extraction.params[p].value);
+                                }
+                                printf("\n");
+                            }
+                        }
+                        // Generate code from pattern
+                        char *generated = malloc(8192);
+                        if (generated) {
+                            if (cp_generate_code_variation(&cp_db->patterns[pat_idx],
+                                                           var_idx, &extraction,
+                                                           generated, 8192) == 0) {
+                                // Store generated code for later use
+                                task->num_extra_emitters = 0;
+                                // The generated code will be used by the caller
+                                if (verbose_flag) {
+                                    printf("  generated code (%d lines):\n",
+                                           cp_db->patterns[pat_idx].variations[var_idx].num_code_lines);
+                                }
+                            }
+                            free(generated);
+                        }
+                    }
+                }
+
+                return tt_emitter;
+            }
+        }
+    }
+
     int tokens[64], num_tokens = tokenize(prompt, tokens, 64);
 
     float emitter_scores[NUM_EMITTERS];

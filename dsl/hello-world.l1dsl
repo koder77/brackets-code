@@ -1,5 +1,5 @@
 // hello-world.l1dsl
-parser: "hello world"
+parser: "hello world, hello, hi, simple hello, basic hello"
 include: intr-func.l1h
 desc: "Print Hello world!"
 code:

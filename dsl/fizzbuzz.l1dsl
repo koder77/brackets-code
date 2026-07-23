@@ -1,5 +1,5 @@
 // fizzbuzz
-parser: "fizzbuzz"
+parser: "fizzbuzz, simple fizzbuzz, compact fizzbuzz, standard fizzbuzz"
 desc: "FizzBuzz program"
 include: intr-func.l1h
 

@@ -1,5 +1,5 @@
 // hello-name.l1dsl
-parser: "hello name"
+parser: "hello name, greet user, say hello, simple greeting"
 include: intr-func.l1h
 desc: "Ask name and greet"
 code:

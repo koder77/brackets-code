@@ -1,5 +1,5 @@
 // selection-sort.l1dsl
-parser: "selection sort, select sort"
+parser: "selection sort, select sort, ascending selection sort, descending selection sort"
 include: intr-func.l1h
 include: vars.l1h
 desc: "Sort an int64 array using selection sort algorithm"
